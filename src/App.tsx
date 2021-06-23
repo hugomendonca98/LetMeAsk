@@ -1,12 +1,8 @@
-import React from 'react';
-
-import Button from './components/button';
+import { Home } from './pages/Home';
 
 function App() {
   return (
-    <div className="App">
-     <Button>Click aqui</Button>
-    </div>
+    <Home />
   );
 }
 
