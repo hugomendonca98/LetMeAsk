@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { FormEvent, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import illustrationImg from '../assets/images/illustration.svg';
@@ -6,15 +6,17 @@ import logoImg from '../assets/images/logo.svg';
 import googleIconImg from '../assets/images/google-icon.svg';
 
 import '../styles/auth.scss'
-import Button from '../components/button';
+import Button from '../components/Button';
 import { useAuth } from '../hooks/userAuth';
-
+import { useState } from 'react';
+import { database } from '../services/firebase';
 
 
 export const Home = () => {
 
     const history = useHistory();
     const {user, signWithGoogle} = useAuth();
+    const [roomCode, setRoomCode] = useState('');
     
     const handleCreateRoom = useCallback(async ()=> {
         if (!user) {
@@ -23,6 +25,24 @@ export const Home = () => {
 
         history.push('/rooms/new');
     }, [history, user, signWithGoogle]);
+
+    const handleJoiRoom = useCallback(async (event: FormEvent)=> {
+        event.preventDefault();
+
+        if (roomCode.trim() === '') {
+            return;
+        }
+
+        const roomRef = await database.ref(`rooms/${roomCode}`).get();
+
+        if (!roomRef.exists()) {
+            alert('Room is not exists.');
+            return;
+        }
+
+        history.push(`/rooms/${roomCode}`)
+
+    }, [history, roomCode]);
 
 
     return (
@@ -40,8 +60,13 @@ export const Home = () => {
                         Crie sua sala com o google
                     </button>
                     <div className="separator">ou entre em uma sala</div>
-                    <form>
-                        <input type="text" placeholder="Digite o código da sala"/>
+                    <form onSubmit={handleJoiRoom}>
+                        <input 
+                        type="text" 
+                        placeholder="Digite o código da sala"
+                        onChange={event => setRoomCode(event.target.value)}
+                        value={roomCode}
+                        />
                         <Button type="submit">Entrar na sala</Button>
                     </form>
                 </div>
